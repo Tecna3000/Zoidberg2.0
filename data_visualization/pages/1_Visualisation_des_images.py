@@ -18,7 +18,7 @@ else:
     if len(folder_level1) == 0:
         st.warning("Aucun dossier trouvé dans le chemin spécifié.")
     else:
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
 
         with col1:
             selected_level1 = st.selectbox("Sélectionnez train/test/val", folder_level1)
@@ -31,12 +31,6 @@ else:
 
         folder_path = os.path.join(level1_path, selected_folder)
         image_files = [f for f in os.listdir(folder_path) if f.lower().endswith(('png', 'jpg', 'jpeg'))]
-
-        with col3:
-            search_query = st.text_input("Rechercher une image par son nom")
-
-        if search_query:
-            image_files = [f for f in image_files if search_query.lower() in f.lower()]
 
         images_per_page = 3
         total_images = len(image_files)
