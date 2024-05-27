@@ -9,15 +9,18 @@ def load_images_from_folder(folder_path: str, image_size: Tuple[int, int] = (224
     images = []
     labels = []
 
+    label_dict = {'NORMAL': 0, 'PNEUMONIA': 1}
+
     for folder_name in os.listdir(folder_path):
-        folder_path = os.path.join(folder_path, folder_name)
-        if os.path.isdir(folder_path):
-            for image_name in os.listdir(folder_path):
-                image_path = os.path.join(folder_path, image_name)
+        sub_folder_path = os.path.join(folder_path, folder_name)
+        if os.path.isdir(sub_folder_path):
+            for image_name in os.listdir(sub_folder_path):
+                image_path = os.path.join(sub_folder_path, image_name)
                 image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-                image = cv2.resize(image, dsize=image_size)
-                images.append(image)
-                labels.append(folder_name)
+                if image is not None:
+                    image = cv2.resize(image, dsize=image_size)
+                    images.append(image)
+                    labels.append(label_dict[folder_name])
 
     return np.array(images), np.array(labels)
 

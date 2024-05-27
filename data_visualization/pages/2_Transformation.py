@@ -5,13 +5,11 @@ import streamlit as st
 import os
 import pandas as pd
 
-from src.preprocessing import generate_histogram
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
+from src.preprocessing import generate_histogram
 from src.augment import augment_image_example
 
-# Configuration de la page
 st.set_page_config(layout="wide")
 
 st.title("Visualisation et Prétraitement des Images de Radiographies")
