@@ -6,7 +6,9 @@ from cv2.typing import MatLike
 from keras.src.legacy.preprocessing.image import ImageDataGenerator
 
 
-def augment_images(images: np.array, labels: np.array, augmentations_per_image: int = 5) -> Tuple[np.array, np.array]:
+def augment_images(
+    images: np.array, labels: np.array, augmentations_per_image: int = 5
+) -> Tuple[np.array, np.array]:
     datagen = ImageDataGenerator(
         rotation_range=20,
         width_shift_range=0.2,
@@ -14,7 +16,7 @@ def augment_images(images: np.array, labels: np.array, augmentations_per_image: 
         shear_range=0.2,
         zoom_range=0.2,
         horizontal_flip=True,
-        fill_mode='nearest'
+        fill_mode="nearest",
     )
 
     augmented_images = []
@@ -28,7 +30,7 @@ def augment_images(images: np.array, labels: np.array, augmentations_per_image: 
 
         aug_count = 0
         for batch in datagen.flow(img, batch_size=1):
-            aug_img = batch[0].astype('float32').squeeze()
+            aug_img = batch[0].astype("float32").squeeze()
             augmented_images.append(aug_img)
             augmented_labels.append(label)
             aug_count += 1
@@ -46,7 +48,7 @@ def augment_image_example(image: MatLike, augmentations_per_image: int = 5) -> n
         shear_range=0.2,
         zoom_range=0.5,
         horizontal_flip=True,
-        fill_mode='nearest'
+        fill_mode="nearest",
     )
 
     original_shape = image.shape[:2]
@@ -57,7 +59,7 @@ def augment_image_example(image: MatLike, augmentations_per_image: int = 5) -> n
     augmented_images = []
 
     for i, batch in enumerate(datagen.flow(image, batch_size=1)):
-        aug_img = batch[0].astype('uint8').squeeze()
+        aug_img = batch[0].astype("uint8").squeeze()
         aug_img = cv2.resize(aug_img, (original_shape[1], original_shape[0]))
         augmented_images.append(aug_img)
         if i >= augmentations_per_image - 1:

@@ -5,7 +5,7 @@ import streamlit as st
 import os
 import pandas as pd
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 from src.preprocessing import generate_histogram
 from src.augment import augment_image_example
@@ -26,7 +26,9 @@ def get_folders(path):
 
 @st.cache_data
 def get_image_files(folder_path):
-    return [f for f in os.listdir(folder_path) if f.lower().endswith(('png', 'jpg', 'jpeg'))]
+    return [
+        f for f in os.listdir(folder_path) if f.lower().endswith(("png", "jpg", "jpeg"))
+    ]
 
 
 @st.cache_resource
@@ -35,15 +37,27 @@ def load_image(image_path):
 
 
 @st.cache_data
-def process_image(image, rotate=0, zoom=1.0, brightness=1.0, contrast=1.0, new_width=None, new_height=None,
-                  flip_horizontal=False, flip_vertical=False):
+def process_image(
+    image,
+    rotate=0,
+    zoom=1.0,
+    brightness=1.0,
+    contrast=1.0,
+    new_width=None,
+    new_height=None,
+    flip_horizontal=False,
+    flip_vertical=False,
+):
     transformed_image = image.copy()
 
     if rotate != 0:
         center = (transformed_image.shape[1] // 2, transformed_image.shape[0] // 2)
         matrix = cv2.getRotationMatrix2D(center, rotate, 1.0)
-        transformed_image = cv2.warpAffine(transformed_image, matrix,
-                                           (transformed_image.shape[1], transformed_image.shape[0]))
+        transformed_image = cv2.warpAffine(
+            transformed_image,
+            matrix,
+            (transformed_image.shape[1], transformed_image.shape[0]),
+        )
 
     if flip_horizontal:
         transformed_image = cv2.flip(transformed_image, 1)
@@ -57,13 +71,21 @@ def process_image(image, rotate=0, zoom=1.0, brightness=1.0, contrast=1.0, new_w
         new_height_zoom = int(height / zoom)
         start_x = (width - new_width_zoom) // 2
         start_y = (height - new_height_zoom) // 2
-        zoomed_image = transformed_image[start_y:start_y + new_height_zoom, start_x:start_x + new_width_zoom]
-        transformed_image = cv2.resize(zoomed_image, (width, height), interpolation=cv2.INTER_LINEAR)
+        zoomed_image = transformed_image[
+            start_y : start_y + new_height_zoom, start_x : start_x + new_width_zoom
+        ]
+        transformed_image = cv2.resize(
+            zoomed_image, (width, height), interpolation=cv2.INTER_LINEAR
+        )
 
-    transformed_image = cv2.convertScaleAbs(transformed_image, alpha=contrast, beta=(brightness - 1) * 255)
+    transformed_image = cv2.convertScaleAbs(
+        transformed_image, alpha=contrast, beta=(brightness - 1) * 255
+    )
 
     if new_width and new_height:
-        transformed_image = cv2.resize(transformed_image, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
+        transformed_image = cv2.resize(
+            transformed_image, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4
+        )
 
     return transformed_image
 
@@ -109,10 +131,14 @@ else:
         resize_col_1, resize_col_2, resize_col_3 = st.columns([2, 2, 1])
 
         with resize_col_1:
-            new_width = st.number_input("Nouvelle largeur", min_value=1, value=image.shape[1])
+            new_width = st.number_input(
+                "Nouvelle largeur", min_value=1, value=image.shape[1]
+            )
 
         with resize_col_2:
-            new_height = st.number_input("Nouvelle hauteur", min_value=1, value=image.shape[0])
+            new_height = st.number_input(
+                "Nouvelle hauteur", min_value=1, value=image.shape[0]
+            )
 
         with resize_col_3:
             checkbox_64 = st.checkbox("64x64")
@@ -134,15 +160,26 @@ else:
         new_width = 128
         new_height = 128
 
-    transformed_image = process_image(image, rotate, zoom, brightness, contrast, new_width, new_height, flip_horizontal,
-                                      flip_vertical)
+    transformed_image = process_image(
+        image,
+        rotate,
+        zoom,
+        brightness,
+        contrast,
+        new_width,
+        new_height,
+        flip_horizontal,
+        flip_vertical,
+    )
 
     transformed_image_rgb = cv2.cvtColor(transformed_image, cv2.COLOR_BGR2RGB)
     with transform_col_2:
         st.image(transformed_image_rgb, use_column_width=True)
 
     if augment_image:
-        augmented_images = augment_image_example(cv2.cvtColor(transformed_image, cv2.COLOR_BGR2GRAY))
+        augmented_images = augment_image_example(
+            cv2.cvtColor(transformed_image, cv2.COLOR_BGR2GRAY)
+        )
 
         cols = st.columns(len(augmented_images))
 
@@ -154,8 +191,10 @@ else:
 
     st.header("Données de l'image", anchor="data")
 
-    original_df = pd.DataFrame(original_array.flatten(), columns=['Grayscale Value'])
-    transformed_df = pd.DataFrame(transformed_array.flatten(), columns=['Grayscale Value'])
+    original_df = pd.DataFrame(original_array.flatten(), columns=["Grayscale Value"])
+    transformed_df = pd.DataFrame(
+        transformed_array.flatten(), columns=["Grayscale Value"]
+    )
 
     col1, col2 = st.columns(2)
 
@@ -170,9 +209,15 @@ else:
     normalized_image = transformed_array / 255.0
 
     st.write("#### Histogramme des niveaux de gris de l'image")
-    st.dataframe(pd.DataFrame(generate_histogram(transformed_image), columns=["Niveau de gris"]).transpose())
+    st.dataframe(
+        pd.DataFrame(
+            generate_histogram(transformed_image), columns=["Niveau de gris"]
+        ).transpose()
+    )
 
-    st.write("#### Dataframe des niveaux de gris de chaque pixel de l'image transformée avant normalisation")
+    st.write(
+        "#### Dataframe des niveaux de gris de chaque pixel de l'image transformée avant normalisation"
+    )
     st.dataframe(transformed_array, hide_index=False)
 
     st.write("#### Dataframe des pixels de l'image transformée après normalisation")
