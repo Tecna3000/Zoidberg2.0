@@ -6,8 +6,8 @@ from cv2.typing import MatLike
 from keras.src.legacy.preprocessing.image import ImageDataGenerator
 
 
-def augment_images(
-    images: np.array, labels: np.array, augmentations_per_image: int = 5
+def augment_images_to_balance(
+    images: np.array, labels: np.array
 ) -> Tuple[np.array, np.array]:
     datagen = ImageDataGenerator(
         rotation_range=20,
@@ -19,23 +19,40 @@ def augment_images(
         fill_mode="nearest",
     )
 
+    unique_classes, class_counts = np.unique(labels, return_counts=True)
+    max_count = max(class_counts)
+
     augmented_images = []
     augmented_labels = []
 
-    for i in range(len(images)):
-        img = images[i]
-        label = labels[i]
-        img = np.expand_dims(img, axis=-1)
-        img = np.expand_dims(img, axis=0)
+    for cls in unique_classes:
+        cls_indices = np.where(labels == cls)[0]
+        cls_images = images[cls_indices]
+        cls_labels = labels[cls_indices]
 
-        aug_count = 0
-        for batch in datagen.flow(img, batch_size=1):
-            aug_img = batch[0].astype("float32").squeeze()
-            augmented_images.append(aug_img)
-            augmented_labels.append(label)
-            aug_count += 1
-            if aug_count >= augmentations_per_image:
-                break
+        num_original_images = len(cls_images)
+        num_augmentations_needed = max_count - num_original_images
+
+        augmented_images.extend(cls_images)
+        augmented_labels.extend(cls_labels)
+
+        if num_augmentations_needed > 0:
+            for img, label in zip(cls_images, cls_labels):
+                img = np.expand_dims(img, axis=-1)
+                img = np.expand_dims(img, axis=0)
+
+                aug_count = 0
+                for batch in datagen.flow(img, batch_size=1):
+                    aug_img = batch[0].astype("float32").squeeze()
+                    augmented_images.append(aug_img)
+                    augmented_labels.append(label)
+                    aug_count += 1
+                    if aug_count >= num_augmentations_needed:
+                        break
+
+                num_augmentations_needed -= aug_count
+                if num_augmentations_needed <= 0:
+                    break
 
     return np.array(augmented_images), np.array(augmented_labels)
 

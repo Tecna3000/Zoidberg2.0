@@ -7,8 +7,8 @@ import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
-from src.preprocessing import generate_histogram
-from src.augment import augment_image_example
+from src.preprocessing import generate_histogram  # noqa: E402
+from src.augment import augment_image_example  # noqa: E402
 
 st.set_page_config(layout="wide")
 
@@ -72,7 +72,8 @@ def process_image(
         start_x = (width - new_width_zoom) // 2
         start_y = (height - new_height_zoom) // 2
         zoomed_image = transformed_image[
-            start_y : start_y + new_height_zoom, start_x : start_x + new_width_zoom
+            start_y : start_y + new_height_zoom,  # noqa: E203
+            start_x : start_x + new_width_zoom,  # noqa: E203
         ]
         transformed_image = cv2.resize(
             zoomed_image, (width, height), interpolation=cv2.INTER_LINEAR
