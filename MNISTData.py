@@ -77,6 +77,6 @@ class MNISTData:
 
 mnist_data = MNISTData()
 mnist_data.display_statistics()
-mnist_data.show_image(dataset='train', index=10)
+mnist_data.show_images(dataset='train', index=10)
 mnist_data.display_mean_images()
 mnist_data.reshape_images()
